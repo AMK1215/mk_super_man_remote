@@ -79,3 +79,11 @@ Route::get('test', function () {
         return response('Error: ' . $e->getMessage(), 500);
     }
 });
+
+Route::get('/foo', function () {
+    $exitCode = Artisan::call('email:send', [
+        'user' => 1, '--queue' => 'default'
+    ]);
+
+    //
+});
