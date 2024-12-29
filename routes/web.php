@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 
 require_once __DIR__.'/admin.php';
 
@@ -29,4 +30,18 @@ Route::get('/test-redis', function () {
 
     // Dump and die (dd) to output the value
     dd($value); // Should output: "value"
+});
+
+Route::get('db-test', function () {
+    try {
+        // Run the migrate:fresh --seed command
+        Artisan::call('migrate:fresh', [
+            '--seed' => true,
+            '--force' => true // Add --force to bypass confirmation prompt
+        ]);
+
+        return 'Database migration and seeding completed successfully.';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
 });
