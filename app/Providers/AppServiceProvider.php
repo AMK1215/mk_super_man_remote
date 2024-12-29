@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Artisan;
 
-
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -32,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') === 'remote') {
             Artisan::prevent(function ($command) {
                 if (in_array($command->getName(), ['migrate', 'migrate:fresh', 'db:seed'])) {
-                    throw new \RuntimeException('This command is not allowed in the remote environment.');
+                    throw new \RuntimeException("The '{$command->getName()}' command is not allowed in the remote environment.");
                 }
             });
         }
