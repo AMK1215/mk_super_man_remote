@@ -6,7 +6,7 @@ use App\Services\ApiService;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Artisan;
-
+use App\Facades\SafeArtisan;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -14,9 +14,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(ApiService::class, function ($app) {
-            return new ApiService('http://gsmd.336699bet.com'); // Replace with your API base URL
-        });
+        $this->app->bind('artisan', function () {
+        return new SafeArtisan;
+    });
     }
 
     /**
