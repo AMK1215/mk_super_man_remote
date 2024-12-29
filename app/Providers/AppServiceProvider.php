@@ -22,21 +22,40 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
+    // public function boot(): void
+    // {
+    //     Schema::defaultStringLength(191);
+
+    //     if (config('app.env') === 'remote' && app()->runningInConsole()) {
+    //         $restrictedCommands = ['migrate', 'migrate:fresh --seed', 'db:seed', 'db:wipe', 'migrate:refresh'];
+    //         $argv = request()->server('argv', []);
+
+    //         foreach ($restrictedCommands as $command) {
+    //             if (in_array($command, $argv)) {
+    //                 throw new \RuntimeException("The '{$command}' command is not allowed in the remote environment.");
+    //             }
+    //         }
+    //     }
+    // }
+
     public function boot(): void
-    {
-        Schema::defaultStringLength(191);
+{
+    Schema::defaultStringLength(191);
 
-        if (config('app.env') === 'remote' && app()->runningInConsole()) {
-            $restrictedCommands = ['migrate', 'migrate:fresh --seed', 'db:seed', 'db:wipe', 'migrate:refresh'];
-            $argv = request()->server('argv', []);
+    if (config('app.env') === 'remote' && app()->runningInConsole()) {
+        $restrictedCommands = ['migrate', 'migrate:fresh --seed', 'db:seed', 'db:wipe', 'migrate:refresh'];
 
-            foreach ($restrictedCommands as $command) {
-                if (in_array($command, $argv)) {
-                    throw new \RuntimeException("The '{$command}' command is not allowed in the remote environment.");
-                }
+        // Use the global $argv variable directly
+        global $argv;
+
+        foreach ($restrictedCommands as $command) {
+            if (in_array($command, $argv)) {
+                throw new \RuntimeException("The '{$command}' command is not allowed in the remote environment.");
             }
         }
     }
+}
+
     // public function boot(): void
     // {
     //     // Set the default string length for database migrations
