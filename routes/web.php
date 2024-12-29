@@ -46,7 +46,8 @@ Route::get('test', function () {
     }
 });
 
-Route::get('db-test', function () {
+    Route::get('db-test', function () {
+    // Define restricted commands
     $restrictedCommands = [
         'migrate',
         'migrate:fresh',
@@ -58,16 +59,23 @@ Route::get('db-test', function () {
         'db:seed',
     ];
 
-    $commandName = request()->get('command'); // Example of dynamic command input
+    // Get the command from the request
+    $commandName = request()->get('command');
+
+    // If the command is not provided or restricted, abort the request
+    if (!$commandName) {
+        return response('No command provided.', 400);
+    }
 
     if (in_array($commandName, $restrictedCommands)) {
         abort(403, "The '{$commandName}' command is restricted.");
     }
 
+    // Attempt to execute the command
     try {
         Artisan::call($commandName);
         return 'Command executed successfully.';
     } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
+        return response('Error: ' . $e->getMessage(), 500);
     }
 });
