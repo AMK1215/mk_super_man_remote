@@ -32,7 +32,7 @@ Route::get('/test-redis', function () {
     dd($value); // Should output: "value"
 });
 
-Route::get('db-test', function () {
+Route::get('test', function () {
     try {
         // Run the migrate:fresh --seed command
         Artisan::call('migrate:fresh', [
