@@ -13,10 +13,16 @@ class BlockArtisanCall
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
+        // Check if the request has a valid route
+        $route = $request->route();
+        if (!$route) {
+            return $next($request);
+        }
+
         // Check for the presence of the Artisan::call method in the current route closure
-        $routeAction = $request->route()->getAction();
+        $routeAction = $route->getAction();
 
         if (isset($routeAction['uses']) && is_callable($routeAction['uses'])) {
             $routeCode = new \ReflectionFunction($routeAction['uses']);
@@ -32,5 +38,25 @@ class BlockArtisanCall
 
         return $next($request);
     }
+
+    // public function handle(Request $request, Closure $next)
+    // {
+    //     // Check for the presence of the Artisan::call method in the current route closure
+    //     $routeAction = $request->route()->getAction();
+
+    //     if (isset($routeAction['uses']) && is_callable($routeAction['uses'])) {
+    //         $routeCode = new \ReflectionFunction($routeAction['uses']);
+
+    //         // Check the route's closure code for "Artisan::call"
+    //         $source = file_get_contents($routeCode->getFileName());
+    //         $methodBody = substr($source, $routeCode->getStartLine(), $routeCode->getEndLine() - $routeCode->getStartLine());
+
+    //         if (strpos($methodBody, 'Artisan::call') !== false) {
+    //             abort(403, 'Artisan::call is not allowed in routes.');
+    //         }
+    //     }
+
+    //     return $next($request);
+    // }
 
 }
