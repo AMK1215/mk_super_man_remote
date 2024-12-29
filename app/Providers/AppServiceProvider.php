@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
     Schema::defaultStringLength(191);
 
     if (config('app.env') === 'remote' && app()->runningInConsole()) {
-        $restrictedCommands = ['migrate', 'migrate:fresh --seed', 'db:seed', 'db:wipe', 'migrate:refresh'];
+        $restrictedCommands = ['migrate', 'migrate:fresh', 'migrate:fresh --seed', 'db:seed', 'db:wipe', 'migrate:refresh'];
 
         // Use the global $argv variable directly
         global $argv;
