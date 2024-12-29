@@ -10,7 +10,6 @@ use App\Http\Controllers\Api\V1\GetBalanceController;
 use App\Http\Controllers\Api\V1\Player\DepositController;
 use App\Http\Controllers\Api\V1\Player\PlayerTransactionLogController;
 use App\Http\Controllers\Api\V1\Player\TransactionController;
-use App\Http\Controllers\Api\V1\Player\UserPaymentControler;
 use App\Http\Controllers\Api\V1\Player\WagerController;
 use App\Http\Controllers\Api\V1\Player\WithDrawController;
 use App\Http\Controllers\Api\V1\PromotionController;
@@ -24,8 +23,6 @@ use App\Http\Controllers\Api\V1\Webhook\BetResultController;
 use App\Http\Controllers\Api\V1\Webhook\CancelBetController;
 use App\Http\Controllers\Api\V1\Webhook\CancelBetNResultController;
 use App\Http\Controllers\Api\V1\Webhook\RewardController;
-use App\Http\Controllers\TestController;
-use App\Models\Admin\Role;
 use Illuminate\Support\Facades\Route;
 
 //auth api
@@ -83,16 +80,6 @@ Route::group(['middleware' => ['auth:sanctum', 'playerBannedCheck']], function (
         Route::get('deposit-log', [TransactionController::class, 'depositRequestLog']);
         Route::get('withdraw-log', [TransactionController::class, 'withDrawRequestLog']);
     });
-
-    // Route::group(['prefix' => 'bank'], function () {
-    //     Route::get('all', [BankController::class, 'all']);
-    // });
-    // Route::group(['prefix' => 'game'], function () {
-    //     Route::post('Seamless/LaunchGame', [LaunchGameController::class, 'launchGame']);
-    // });
-    // Route::group(['prefix' => 'direct'], function () {
-    //     Route::post('Seamless/LaunchGame', [LaunchGameController::class, 'directLaunchGame']);
-    // });
 });
 
 Route::get('/game/gamelist/{provider_id}/{game_type_id}', [GameController::class, 'gameList']);
