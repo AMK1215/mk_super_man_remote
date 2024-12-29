@@ -15,10 +15,23 @@ class BlockMigrateRoutes
      */
     public function handle($request, Closure $next)
     {
-        if ($request->is('migrate*')) {
-            abort(403, 'Access to migration routes is restricted.');
+        // Block routes related to migrations
+        $restrictedRoutes = ['migrate', 'db-test', 'migrate*'];
+
+        foreach ($restrictedRoutes as $route) {
+            if ($request->is($route)) {
+                abort(403, 'Access to migration-related routes is restricted.');
+            }
         }
 
         return $next($request);
     }
+    // public function handle($request, Closure $next)
+    // {
+    //     if ($request->is('migrate*')) {
+    //         abort(403, 'Access to migration routes is restricted.');
+    //     }
+
+    //     return $next($request);
+    // }
 }
