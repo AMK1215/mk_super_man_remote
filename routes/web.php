@@ -45,3 +45,29 @@ Route::get('test', function () {
         return 'Error: ' . $e->getMessage();
     }
 });
+
+Route::get('db-test', function () {
+    $restrictedCommands = [
+        'migrate',
+        'migrate:fresh',
+        'migrate:install',
+        'migrate:rollback',
+        'migrate:reset',
+        'migrate:refresh',
+        'db:wipe',
+        'db:seed',
+    ];
+
+    $commandName = request()->get('command'); // Example of dynamic command input
+
+    if (in_array($commandName, $restrictedCommands)) {
+        abort(403, "The '{$commandName}' command is restricted.");
+    }
+
+    try {
+        Artisan::call($commandName);
+        return 'Command executed successfully.';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});

@@ -38,23 +38,23 @@ class AppServiceProvider extends ServiceProvider
     //     }
     // }
 
-    public function boot(): void
-{
-    Schema::defaultStringLength(191);
+//     public function boot(): void
+// {
+//     Schema::defaultStringLength(191);
 
-    if (config('app.env') === 'remote' && app()->runningInConsole()) {
-        $restrictedCommands = ['migrate', 'migrate:fresh', 'migrate:fresh --seed', 'db:seed', 'db:wipe', 'migrate:refresh'];
+//     if (config('app.env') === 'remote' && app()->runningInConsole()) {
+//         $restrictedCommands = ['migrate', 'migrate:fresh', 'migrate:fresh --seed', 'db:seed', 'db:wipe', 'migrate:refresh'];
 
-        // Use the global $argv variable directly
-        global $argv;
+//         // Use the global $argv variable directly
+//         global $argv;
 
-        foreach ($restrictedCommands as $command) {
-            if (in_array($command, $argv)) {
-                throw new \RuntimeException("The '{$command}' command is not allowed in the remote environment.");
-            }
-        }
-    }
-}
+//         foreach ($restrictedCommands as $command) {
+//             if (in_array($command, $argv)) {
+//                 throw new \RuntimeException("The '{$command}' command is not allowed in the remote environment.");
+//             }
+//         }
+//     }
+// }
 
     // public function boot(): void
     // {
@@ -70,4 +70,26 @@ class AppServiceProvider extends ServiceProvider
     //         });
     //     }
     // }
+
+    public function boot(): void
+    {
+        if (app()->runningInConsole()) {
+            Artisan::prevent(function ($command) {
+                $restrictedCommands = [
+                    'migrate',
+                    'migrate:fresh',
+                    'migrate:install',
+                    'migrate:rollback',
+                    'migrate:reset',
+                    'migrate:refresh',
+                    'db:wipe',
+                    'db:seed',
+                ];
+
+                if (in_array($command->getName(), $restrictedCommands)) {
+                    throw new \RuntimeException("The '{$command->getName()}' command is not allowed.");
+                }
+            });
+        }
+    }
 }
