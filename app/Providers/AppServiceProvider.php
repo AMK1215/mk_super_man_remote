@@ -72,24 +72,30 @@ class AppServiceProvider extends ServiceProvider
     // }
 
     public function boot(): void
-    {
-        if (app()->runningInConsole()) {
-            Artisan::prevent(function ($command) {
-                $restrictedCommands = [
-                    'migrate',
-                    'migrate:fresh',
-                    'migrate:install',
-                    'migrate:rollback',
-                    'migrate:reset',
-                    'migrate:refresh',
-                    'db:wipe',
-                    'db:seed',
-                ];
+{
+    if (app()->runningInConsole()) {
+        $restrictedCommands = [
+            'migrate',
+            'migrate:fresh',
+            'migrate:install',
+            'migrate:rollback',
+            'migrate:reset',
+            'migrate:refresh',
+            'db:wipe',
+            'db:seed',
+        ];
 
-                if (in_array($command->getName(), $restrictedCommands)) {
-                    throw new \RuntimeException("The '{$command->getName()}' command is not allowed.");
+        // Use the global $argv variable to check commands
+        global $argv;
+
+        foreach ($restrictedCommands as $command) {
+            foreach ($argv as $arg) {
+                if (str_contains($arg, $command)) {
+                    throw new \RuntimeException("The '{$command}' command is not allowed.");
                 }
-            });
+            }
         }
     }
+}
+
 }
