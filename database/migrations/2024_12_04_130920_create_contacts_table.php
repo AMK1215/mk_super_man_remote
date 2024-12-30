@@ -15,10 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('link');
             $table->unsignedBigInteger('contact_type_id');
-            $table->unsignedBigInteger('agent_id')->nullable();
             $table->timestamps();
 
-            $table->foreign('agent_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('contact_type_id')->references('id')->on('contact_types')->onDelete('cascade');
         });
     }

@@ -43,7 +43,11 @@ class RolesTableSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-
+            [
+                'title' => 'Sub Agent',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ];
 
         Role::insert($roles);

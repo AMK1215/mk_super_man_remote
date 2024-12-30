@@ -50,6 +50,7 @@ class User extends Authenticatable implements Wallet
         'type',
         'referral_code',
         'commission',
+        'register_ip'
     ];
 
     protected $dispatchesEvents = [

@@ -60,6 +60,9 @@
 <div class="row mt-4">
   <div class="col-12">
     <div class="card">
+      <div class="card-body">
+        <h5 class="mb-0">Deposit Requests</h5>
+      </div>
       <!-- Card header -->
       <div class="card-header pb-0">
         <form action="{{route('admin.agent.deposit')}}" method="GET">
@@ -70,6 +73,19 @@
                 <input type="text" class="form-control" name="player_id" value="{{request()->player_id}}">
               </div>
             </div>
+            @can('master_access')
+            <div class="col-md-3">
+              <div class="input-group input-group-static mb-4">
+                <label for="">AgentId</label>
+                <select name="agent_id" id="" class="form-control">
+                  <option value="">Select Agent</option>
+                  @foreach(Auth::user()->children as $agent)
+                  <option value="{{$agent->id}}">{{$agent->user_name}}- {{$agent->name}}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+            @endcan
             <div class="col-md-3">
               <div class="input-group input-group-static mb-4">
                 <label for="">Start Date</label>
@@ -112,7 +128,9 @@
             <th>Payment Method</th>
             <th>Status</th>
             <th>DateTime</th>
+            @canany(['master_access', 'agent_access'])
             <th>Action</th>
+            @endcanany
           </thead>
           <tbody>
             @foreach ($deposits as $deposit)
@@ -132,11 +150,13 @@
                 @endif
               </td>
               <td>{{ $deposit->created_at->setTimezone('Asia/Yangon')->format('d-m-Y H:i:s') }}</td>
+              @canany(['master_access', 'agent_access'])
               <td>
                 <div class="d-flex align-items-center">
                   <a href="{{route('admin.agent.depositShow', $deposit->id)}}" class="text-white btn btn-info">Detail</a>
                 </div>
               </td>
+              @endcanany
             </tr>
             @endforeach
           </tbody>

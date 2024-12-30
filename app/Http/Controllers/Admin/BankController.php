@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UserPaymentRequest;
 use App\Models\Admin\Bank;
 use App\Models\BankAgent;
 use App\Models\PaymentType;
-use App\Models\UserPayment;
 use App\Traits\AuthorizedCheck;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 
 class BankController extends Controller
 {
@@ -126,28 +124,19 @@ class BankController extends Controller
             'account_number' => 'required|numeric',
             'payment_type_id' => 'required|exists:payment_types,id',
         ]);
+        DB::transaction(function () use ($bank, $data, $request, $isMaster, $user) {
+            $bank->update($data);
+            $bank->bankAgents()->delete();
 
-        $bank->update([
-            'account_name' => $request->account_name,
-            'account_number' => $request->account_number,
-            'payment_type_id' => $request->payment_type_id
-        ]);
-
-        if ($request->type === "single") {
-            $agentId = $isMaster ? $request->agent_id : $user->id;
-            $bank->bankAgents()->update([
-                'agent_id' => $agentId
-            ]);
-
-        } elseif ($request->type === "all") {
-            foreach ($user->agents as $agent) {
-                $bank->bankAgents()->updateOrCreate(
-                    ['agent_id' => $agent->id],
-                    ['bank_id' => $bank->id]
-                );
+            if ($request->type === "single") {
+                $agentId = $isMaster ? $request->agent_id : $user->id;
+                $bank->bankAgents()->create(['agent_id' => $agentId, 'bank_id' => $bank->id]);
+            } elseif ($request->type === "all") {
+                foreach ($user->agents as $agent) {
+                    $bank->bankAgents()->create(['agent_id' => $agent->id, 'bank_id' => $bank->id]);
+                }
             }
-        }
-        $bank->update($data);
+        });
 
         return redirect(route('admin.banks.index'))->with('success', 'Bank Updated Successfully.');
     }

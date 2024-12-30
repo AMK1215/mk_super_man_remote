@@ -22,20 +22,31 @@ class Contact extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function contactAgents()
+    {
+        return $this->hasMany(ContactAgent::class);
+    }
+
     public function scopeAgent($query)
     {
-        return $query->where('agent_id', Auth::user()->id);
+        return $query->whereHas('contactAgents', function ($query) {
+            $query->where('agent_id', Auth::id());
+        });
     }
 
     public function scopeAgentPlayer($query)
     {
-        return $query->where('agent_id', auth()->user()->agent_id);
+        return $query->whereHas('contactAgents', function ($query) {
+            $query->where('agent_id', Auth::user()->agent_id);
+        });
     }
 
     public function scopeMaster($query)
     {
         $agents = User::find(auth()->user()->id)->agents()->pluck('id')->toArray();
 
-        return $query->whereIn('agent_id', $agents);
+        return $query->whereHas('contactAgents', function ($query) use ($agents) {
+            $query->whereIn('agent_id', $agents);
+        });
     }
 }

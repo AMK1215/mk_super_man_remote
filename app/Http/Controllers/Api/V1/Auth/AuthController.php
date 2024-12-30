@@ -131,6 +131,7 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'agent_id' => $agent->id,
                 'type' => UserType::Player,
+                'register_ip' => $request->ip()
             ]);
         } else {
             $user = User::create([
@@ -140,6 +141,8 @@ class AuthController extends Controller
                 'password' => Hash::make($request->password),
                 'agent_id' => 4,
                 'type' => UserType::Player,
+                'register_ip' => $request->ip(),
+
             ]);
         }
 
@@ -147,7 +150,6 @@ class AuthController extends Controller
 
         UserLog::create([
             'ip_address' => $request->ip(),
-            'register_ip' => $request->ip(),
             'user_id' => $user->id,
             'user_agent' => $request->userAgent(),
         ]);

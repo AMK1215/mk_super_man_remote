@@ -22,14 +22,12 @@
             </li>
         @endcan
 
-        @can('player_index')
             <li class="nav-item">
                 <a class="nav-link text-white " href="{{ route('admin.report.index') }}">
                     <span class="sidenav-mini-icon"> <i class="fa-solid fa-chart-column"></i> </span>
                     <span class="sidenav-normal  ms-2  ps-1"> Win/lose Report </span>
                 </a>
             </li>
-        @endcan
         @can('withdraw_requests')
             <li class="nav-item">
                 <a class="nav-link text-white " href="{{ route('admin.agent.withdraw') }}">
@@ -70,12 +68,14 @@
                 </a>
             </li>
         @endcan
+        @canany(['master_access', 'agent_access'])
         <li class="nav-item">
             <a class="nav-link text-white " href="{{ route('admin.transferLog') }}">
                 <span class="sidenav-mini-icon"> <i class="fas fa-right-left"></i> </span>
                 <span class="sidenav-normal  ms-2  ps-1">Transfer Log</span>
             </a>
         </li>
+        @endcanany
         @canany(['master_access', 'agent_access'])
             <li class="nav-item ">
                 <a class="nav-link text-white " href="{{ route('admin.banks.index') }}">
@@ -99,8 +99,8 @@
                     <span class="sidenav-normal  ms-2  ps-1"> Bonus </span>
                 </a>
             </li>
-        @endcan
-        <hr class="horizontal light mt-0">
+            @endcanany
+                    <hr class="horizontal light mt-0">
         
             <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#dashboardsExamples" class="nav-link text-white "
@@ -158,13 +158,14 @@
                         </li>
                         
                         @endcan
-                        
+                        @canany(['master_access', 'agent_access'])
                         <li class="nav-item ">
                             <a class="nav-link text-white " href="{{ route('admin.bonustype') }}">
                                 <span class="sidenav-mini-icon">G L</span>
                                 <span class="sidenav-normal  ms-2  ps-1"> BonusTypes </span>
                             </a>
                         </li>
+                        @endcanany
                     </ul>
                 </div>
             </li>

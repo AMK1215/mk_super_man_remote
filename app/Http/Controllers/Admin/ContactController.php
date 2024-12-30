@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
+use App\Models\ContactAgent;
 use App\Models\ContactType;
 use App\Traits\AuthorizedCheck;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ContactController extends Controller
 {
@@ -54,22 +58,28 @@ class ContactController extends Controller
         ]);
 
         $type = $request->type ?? 'single';
-        if ($type === 'single') {
-            $agentId = $isMaster ? $request->agent_id : $user->id;
-            $this->FeaturePermission($agentId);
-            Contact::create([
+        try {
+            $contact = Contact::create([
                 'link' => $request->link,
                 'contact_type_id' => $request->contact_type_id,
-                'agent_id' => $agentId,
             ]);
-        } elseif ($type === 'all') {
-            foreach ($user->agents as $agent) {
-                Contact::create([
-                    'link' => $request->link,
-                    'contact_type_id' => $request->contact_type_id,
-                    'agent_id' => $agent->id,
+            if ($type === 'single') {
+                $agentId = $isMaster ? $request->agent_id : $user->id;
+                $this->FeaturePermission($agentId);
+                ContactAgent::create([
+                    'contact_id' => $contact->id,
+                    'agent_id' => $agentId
                 ]);
+            } elseif ($type === 'all') {
+                foreach ($user->agents as $agent) {
+                    ContactAgent::create([
+                        'contact_id' => $contact->id,
+                        'agent_id' => $agent->id
+                    ]);
+                }
             }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
         }
 
         return redirect()->route('admin.contact.index')->with('success', 'Contact created successfully');
@@ -103,18 +113,32 @@ class ContactController extends Controller
     public function update(Request $request, Contact $contact)
     {
         $this->MasterAgentRoleCheck();
+        $user = Auth::user();
+        $isMaster = $user->hasRole('Master');
+
         if (! $contact) {
             return redirect()->back()->with('error', 'Banner Text Not Found');
         }
-        $this->FeaturePermission($contact->agent_id);
         $data = $request->validate([
             'link' => 'required',
             'contact_type_id' => 'required|exists:contact_types,id',
         ]);
-        $contact->update($data);
+
+        DB::transaction(function () use ($contact, $data, $request, $isMaster, $user) {
+            $contact->update($data);
+            $contact->contactAgents()->delete();
+
+            if ($request->type === "single") {
+                $agentId = $isMaster ? $request->agent_id : $user->id;
+                $contact->contactAgents()->create(['agent_id' => $agentId, 'contact_id' => $contact->id]);
+            } elseif ($request->type === "all") {
+                foreach ($user->agents as $agent) {
+                    $contact->contactAgents()->create(['agent_id' => $agent->id, 'contact_id' => $contact->id]);
+                }
+            }
+        });
 
         return redirect()->route('admin.contact.index')->with('success', 'Contact updated successfully');
-
     }
 
     /**

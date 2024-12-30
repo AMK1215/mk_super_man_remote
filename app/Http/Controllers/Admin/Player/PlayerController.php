@@ -28,7 +28,6 @@ class PlayerController extends Controller
      */
     public function index(Request $request)
     {
-        // Check for permission
         abort_if(
             Gate::denies('player_index'),
             Response::HTTP_FORBIDDEN,
@@ -39,33 +38,10 @@ class PlayerController extends Controller
         $agentIds = [$user->id];
 
         if ($user->hasRole('Master')) {
-            $agentIds = User::where('agent_id', $user->id)->pluck('id')->toArray();
+            $agentIds = $this->getAgentIds($request, $user);
         }
-
-        $users = User::with(['roles', 'userLog'])
-            ->whereHas('roles', fn($query) => $query->where('role_id', self::PLAYER_ROLE))
-            ->when($request->player_id, fn($query) => $query->where('user_name', $request->player_id))
-            ->when(
-                $request->start_date && $request->end_date,
-                fn($query) => $query->whereBetween('created_at', [
-                    $request->start_date . ' 00:00:00',
-                    $request->end_date . ' 23:59:59',
-                ])
-            )
-            ->when($request->ip_address, function ($query) use ($request) {
-                $query->whereHas('userLog', function ($subQuery) use ($request) {
-                    $subQuery->where('ip_address', $request->ip_address)->latest();
-                });
-            })
-            ->when($request->register_ip, function ($query) use ($request) {
-                $query->whereHas('userLog', function ($subQuery) use ($request) {
-                    $subQuery->where('register_ip', $request->register_ip);
-                });
-            })
-            ->whereIn('agent_id', $agentIds)
-            ->orderByDesc('id')
-            ->get();
-
+        $users = $this->buildUserQuery($request, $agentIds)->get();
+        
         return view('admin.player.index', compact('users'));
     }
 
@@ -98,20 +74,18 @@ class PlayerController extends Controller
         try {
             $agent = $this->determineAgent($request);
 
-            // Validate agent balance for the specified amount
             if ($this->isAmountExceedingBalance($request->amount ?? 0, $agent->balanceFloat)) {
                 return redirect()->back()->with('error', 'Insufficient balance to create the player.');
             }
 
-            // Create the player
             $player = $this->createPlayer($request, $agent);
 
-            // Handle initial amount transfer
             if (! empty($request->amount)) {
                 $this->transferInitialAmount($agent, $player, $request->amount);
             }
+
             UserLog::create([
-                'register_ip' => $request->ip(),
+                'ip_address' => $request->ip(),
                 'user_id' => $player->id,
                 'user_agent' => $request->userAgent(),
             ]);
@@ -122,7 +96,7 @@ class PlayerController extends Controller
                 ->with('password', $request->password)
                 ->with('user_name', $player->user_name);
         } catch (Exception $e) {
-            Log::error('Error creating player: '.$e->getMessage());
+            Log::error('Error creating player: ' . $e->getMessage());
 
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -200,7 +174,7 @@ class PlayerController extends Controller
 
         return redirect()->back()->with(
             'success',
-            'User '.($user->status == 1 ? 'activate' : 'inactive').' successfully'
+            'User ' . ($user->status == 1 ? 'activate' : 'inactive') . ' successfully'
         );
     }
 
@@ -381,6 +355,7 @@ class PlayerController extends Controller
             'phone' => $request->phone,
             'agent_id' => $agent->id ?? Auth::id(),
             'type' => UserType::Player,
+            'register_ip' => $request->ip()
         ]);
 
         $player->roles()->sync(self::PLAYER_ROLE);
@@ -391,5 +366,32 @@ class PlayerController extends Controller
     private function transferInitialAmount($agent, $player, $amount)
     {
         app(WalletService::class)->transfer($agent, $player, $amount, TransactionName::CreditTransfer, ['agent_id' => Auth::id()]);
+    }
+
+    private function getAgentIds($request, $user)
+    {
+        if ($request->agent_id) {
+            return User::where('id', $request->agent_id)->pluck('id')->toArray();
+        }
+
+        return User::where('agent_id', $user->id)->pluck('id')->toArray();
+    }
+
+    private function buildUserQuery($request, $agentIds)
+    {
+        return User::with(['roles', 'userLog'])
+            ->whereHas('roles', fn($query) => $query->where('role_id', self::PLAYER_ROLE))
+            ->when($request->player_id, fn($query) => $query->where('user_name', $request->player_id))
+            ->when(
+                $request->start_date && $request->end_date,
+                fn($query) => $query->whereBetween('created_at', [
+                    $request->start_date . ' 00:00:00',
+                    $request->end_date . ' 23:59:59',
+                ])
+            )
+            ->when($request->ip_address, fn($query) => $query->whereHas('userLog', fn($subQuery) => $subQuery->where('ip_address', $request->ip_address)->latest()))
+            ->when($request->register_ip, fn($query) => $query->whereHas('userLog', fn($subQuery) => $subQuery->where('register_ip', $request->register_ip)))
+            ->whereIn('agent_id', $agentIds)
+            ->orderByDesc('id');
     }
 }

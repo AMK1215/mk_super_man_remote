@@ -22,10 +22,13 @@ class TransferLogController extends Controller
             ->when(isset($request->type), function ($query) use ($request) {
                 $query->where('transactions.type', $request->type);
             })
+            ->when(isset($request->agent_id), function ($query) use ($request) {
+                $query->where('transactions.agent_id', $request->agent_id);
+            })
             ->when(isset($request->start_date) && isset($request->end_date), function ($query) use ($request) {
                 $query->whereBetween('transactions.created_at', [$request->start_date.' 00:00:00', $request->end_date.' 23:59:59']);
             })
-            ->latest()->paginate();
+            ->latest()->get();
 
         return view('admin.trans_log.index', compact('transferLogs'));
     }

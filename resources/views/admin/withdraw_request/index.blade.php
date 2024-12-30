@@ -60,6 +60,10 @@
 <div class="row mt-4">
     <div class="col-12">
         <div class="card">
+            <div class="card-body">
+                <h5 class="mb-0">Withdraw Requests</h5>
+
+            </div>
             <!-- Card header -->
             <div class="card-header pb-0">
                 <form action="{{route('admin.agent.withdraw')}}" method="GET">
@@ -70,6 +74,19 @@
                                 <input type="text" class="form-control" name="player_id" value="{{request()->player_id}}">
                             </div>
                         </div>
+                        @can('master_access')
+                        <div class="col-md-3">
+                            <div class="input-group input-group-static mb-4">
+                                <label for="">AgentId</label>
+                                <select name="agent_id" id="" class="form-control">
+                                    <option value="">Select Agent</option>
+                                    @foreach(Auth::user()->children as $agent)
+                                    <option value="{{$agent->id}}">{{$agent->user_name}}- {{$agent->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        @endcan
                         <div class="col-md-3">
                             <div class="input-group input-group-static mb-4">
                                 <label for="">Start Date</label>
@@ -114,8 +131,10 @@
                         <th>Bank Account Number</th>
                         <th>Status</th>
                         <th>Created_at</th>
+                        @canany(['master_access', 'agent_access'])
                         <th>Action</th>
-                    </thead>
+                        @endcanany
+                        </thead>
                     <tbody>
                         @foreach ($withdraws as $withdraw)
                         <tr>
@@ -136,6 +155,7 @@
                                 @endif
                             </td>
                             <td>{{ $withdraw->created_at->format('d-m-Y H:m:i') }}</td>
+                            @canany(['master_access', 'agent_access'])
                             <td>
                                 <div class="d-flex align-items-center">
                                     <form action="{{ route('admin.agent.withdrawStatusUpdate', $withdraw->id) }}" method="post">
@@ -161,6 +181,7 @@
                                     </form>
                                 </div>
                             </td>
+                            @endcanany
                         </tr>
                         @endforeach
                     </tbody>
@@ -188,7 +209,7 @@
         document.getElementById('export-csv').addEventListener('click', function() {
             dataTableSearch.export({
                 type: "csv",
-                filename: "deposit",
+                filename: "withraw",
             });
         });
     };

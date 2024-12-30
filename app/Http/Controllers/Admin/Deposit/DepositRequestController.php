@@ -20,8 +20,9 @@ class DepositRequestController extends Controller
         $agentIds = [$user->id];
 
         if ($user->hasRole('Master')) {
-            $agentIds = User::where('agent_id', $user->id)->pluck('id')->toArray();
+            $agentIds = $this->getAgentIds($request, $user);
         }
+
         $deposits = DepositRequest::with('bank')
             ->when($request->start_date && $request->end_date, function ($query) use ($request) {
                 $query->whereBetween('created_at', [
@@ -104,13 +105,12 @@ class DepositRequestController extends Controller
         return view('admin.deposit_request.show', compact('deposit'));
     }
 
-    private function isExistingAgent($userId)
+    private function getAgentIds($request, $user)
     {
-        return User::find($userId);
-    }
+        if ($request->agent_id) {
+            return User::where('id', $request->agent_id)->pluck('id')->toArray();
+        }
 
-    private function getAgent()
-    {
-        return $this->isExistingAgent(Auth::id());
+        return User::where('agent_id', $user->id)->pluck('id')->toArray();
     }
 }

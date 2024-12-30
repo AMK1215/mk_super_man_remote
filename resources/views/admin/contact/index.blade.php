@@ -36,21 +36,20 @@
         <table class="table table-flush" id="contact-search">
           <thead class="thead-light">
             <tr>
+              <th>Contact Type</th>
               <th>Link</th>
               <th>Icon</th>
-              <th>Contact Type</th>
-              <th>Agent</th>
             </tr>
           </thead>
           <tbody>
             @foreach($contacts as $key => $contact)
             <tr>
-              <td class="text-sm font-weight-normal">{{ $contact->link }}</td>
+              <td class="text-sm font-weight-normal">{{ $contact->contact_type->name }}</td>
               <td class="text-sm font-weight-normal">
                 <img src="{{ $contact->contact_type->img_url }}" width="30px" alt="">
               </td>
-              <td class="text-sm font-weight-normal">{{ $contact->contact_type->name }}</td>
-              <td class="text-sm font-weight-normal">{{ $contact->agent->name }}</td>
+              <td class="text-sm font-weight-normal">{{ $contact->link }}</td>
+            
               <td>
                 <a href="{{ route('admin.contact.edit', $contact->id) }}" data-bs-toggle="tooltip" data-bs-original-title="Edit Contact"><i class="material-icons-round text-secondary position-relative text-lg">mode_edit</i></a>
                 <form class="d-inline" action="{{ route('admin.contact.destroy', $contact->id) }}" method="POST">

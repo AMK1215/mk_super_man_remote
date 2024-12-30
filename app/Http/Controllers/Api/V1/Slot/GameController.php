@@ -62,7 +62,7 @@ class GameController extends Controller
                 $query->with('gameType');
             }])
             ->get();
-        // dd($gameLists);
+
         return $this->success(GameDetailResource::collection($gameLists), 'Hot Game Detail Successfully');
     }
 

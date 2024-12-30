@@ -76,6 +76,19 @@
                 <input type="text" class="form-control" name="player_id" value="{{request()->player_id}}">
               </div>
             </div>
+            @can('master_access')
+            <div class="col-md-3">
+              <div class="input-group input-group-static mb-4">
+                <label for="">AgentId</label>
+                <select name="agent_id" id="" class="form-control">
+                  <option value="">Select Agent</option>
+                  @foreach(Auth::user()->children as $agent)
+                  <option value="{{$agent->id}}">{{$agent->user_name}}- {{$agent->name}}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+            @endcan
             <div class="col-md-3">
               <div class="input-group input-group-static mb-4">
                 <label for="">Start Date</label>
@@ -122,11 +135,14 @@
             <th>Phone</th>
             <th>Status</th>
             <th>Balance</th>
+            <th>RegisterIP</th>
+            <th>RegisterationTime</th>
+            <th>LastLoingIP</th>
+            <th>LastLoginTime</th>
             <th>Action</th>
             <th>Transaction</th>
           </thead>
           <tbody>
-            {{-- kzt --}}
             @if(isset($users))
             @if(count($users)>0)
             @foreach ($users as $user)
@@ -144,6 +160,10 @@
                 <small class="badge bg-gradient-{{ $user->status == 1 ? 'success' : 'danger' }}">{{ $user->status == 1 ? "active" : "inactive" }}</small>
               </td>
               <td>{{number_format($user->balanceFloat,2) }} </td>
+              <td>{{$user->register_ip}}</td>
+              <td>{{$user->created_at}}</td>
+              <td>{{$user->userLog[0]->ip_address ?? ''}}</td>
+              <td>{{$user->userLog[0]->created_at ?? ''}}</td>
               <td>
                 @if ($user->status == 1)
                 <a onclick="event.preventDefault(); document.getElementById('banUser-{{ $user->id }}').submit();" class="me-2" href="#" data-bs-toggle="tooltip" data-bs-original-title="Active Player">

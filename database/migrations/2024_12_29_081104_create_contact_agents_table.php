@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_logs', function (Blueprint $table) {
+        Schema::create('contact_agents', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->string('ip_address');
+            $table->unsignedBigInteger('contact_id');
+            $table->unsignedBigInteger('agent_id');
             $table->timestamps();
-
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-
+            $table->foreign('agent_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('contact_id')->references('id')->on('contacts')->onDelete('cascade');
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_logs');
+        Schema::dropIfExists('contact_agents');
     }
 };
