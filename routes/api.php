@@ -5,8 +5,7 @@ use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Bank\BankController;
 use App\Http\Controllers\Api\V1\BannerController;
 use App\Http\Controllers\Api\V1\ContactController;
-//use App\Http\Controllers\Api\V1\Game\LaunchGameController;
-use App\Http\Controllers\Api\V1\GetBalanceController;
+
 use App\Http\Controllers\Api\V1\Player\DepositController;
 use App\Http\Controllers\Api\V1\Player\PlayerTransactionLogController;
 use App\Http\Controllers\Api\V1\Player\TransactionController;
@@ -14,15 +13,9 @@ use App\Http\Controllers\Api\V1\Player\WagerController;
 use App\Http\Controllers\Api\V1\Player\WithDrawController;
 use App\Http\Controllers\Api\V1\PromotionController;
 use App\Http\Controllers\Api\V1\Slot\GameController;
-use App\Http\Controllers\Api\V1\Slot\GetDaySummaryController;
+
 use App\Http\Controllers\Api\V1\Slot\LaunchGameController;
-use App\Http\Controllers\Api\V1\Webhook\AdjustmentController;
-use App\Http\Controllers\Api\V1\Webhook\BetController;
-use App\Http\Controllers\Api\V1\Webhook\BetNResultController;
-use App\Http\Controllers\Api\V1\Webhook\BetResultController;
-use App\Http\Controllers\Api\V1\Webhook\CancelBetController;
-use App\Http\Controllers\Api\V1\Webhook\CancelBetNResultController;
-use App\Http\Controllers\Api\V1\Webhook\RewardController;
+
 use Illuminate\Support\Facades\Route;
 
 //auth api
@@ -33,18 +26,6 @@ Route::get('gameTypeProducts/{id}', [GameController::class, 'gameTypeProducts'])
 Route::get('allGameProducts', [GameController::class, 'allGameProducts']);
 Route::post('Seamless/PullReport', [LaunchGameController::class, 'pullReport']);
 
-// sameless route
-Route::post('GetBalance', [GetBalanceController::class, 'getBalance']);
-Route::post('BetNResult', [BetNResultController::class, 'handleBetNResult']);
-Route::post('CancelBetNResult', [CancelBetNResultController::class, 'handleCancelBetNResult']);
-Route::post('Bet', [BetController::class, 'handleBet']);
-Route::post('Result', [BetResultController::class, 'handleResult']);
-Route::post('CancelBet', [CancelBetController::class, 'handleCancelBet']);
-Route::post('Adjustment', [AdjustmentController::class, 'handleAdjustment']);
-Route::post('Reward', [RewardController::class, 'handleReward']);
-
-// for slot
-Route::post('/transaction-details/{tranId}', [GetDaySummaryController::class, 'getTransactionDetails']);
 
 Route::group(['middleware' => ['auth:sanctum', 'playerBannedCheck']], function () {
 
