@@ -8,6 +8,7 @@ use App\Models\DepositRequest;
 use App\Models\User;
 use App\Models\UserPayment;
 use App\Services\WalletService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,12 +23,14 @@ class DepositRequestController extends Controller
         if ($user->hasRole('Master')) {
             $agentIds = $this->getAgentIds($request, $user);
         }
+        $startDate = $request->start_date ?? Carbon::today()->format('Y-m-d');
+        $endDate = $request->end_date ?? Carbon::today()->format('Y-m-d');
 
         $deposits = DepositRequest::with('bank')
-            ->when($request->start_date && $request->end_date, function ($query) use ($request) {
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [
-                    $request->start_date . ' 00:00:00',
-                    $request->end_date . ' 23:59:59',
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59',
                 ]);
             })
             ->when($request->player_id, function ($query) use ($request) {

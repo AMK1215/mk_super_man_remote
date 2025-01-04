@@ -11,6 +11,7 @@ use App\Models\Admin\UserLog;
 use App\Models\PaymentType;
 use App\Models\User;
 use App\Services\WalletService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -379,14 +380,17 @@ class PlayerController extends Controller
 
     private function buildUserQuery($request, $agentIds)
     {
+        $startDate = $request->start_date ?? Carbon::today()->format('Y-m-d');
+        $endDate = $request->end_date ?? Carbon::today()->format('Y-m-d');
+
         return User::with(['roles', 'userLog'])
             ->whereHas('roles', fn($query) => $query->where('role_id', self::PLAYER_ROLE))
             ->when($request->player_id, fn($query) => $query->where('user_name', $request->player_id))
             ->when(
-                $request->start_date && $request->end_date,
+                $startDate && $endDate,
                 fn($query) => $query->whereBetween('created_at', [
-                    $request->start_date . ' 00:00:00',
-                    $request->end_date . ' 23:59:59',
+                    $startDate . ' 00:00:00',
+                    $endDate . ' 23:59:59',
                 ])
             )
             ->when($request->ip_address, fn($query) => $query->whereHas('userLog', fn($subQuery) => $subQuery->where('ip_address', $request->ip_address)->latest()))
