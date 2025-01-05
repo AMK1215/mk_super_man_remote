@@ -91,9 +91,20 @@ class ReportController extends Controller
 
     private function getPlayerDetails($playerId, $productType)
     {
-        return Result::where('user_id', $playerId)->when($productType, function ($query) use ($productType) {
+        $startDate = $request->start_date ?? Carbon::today()->format('Y-m-d');
+        $endDate = $request->end_date ?? Carbon::today()->format('Y-m-d');
+
+        return Result::where('user_id', $playerId)
+        ->when($productType, function ($query) use ($productType) {
             $query->where('game_provide_name', $productType);
-        })->orderBy('id', 'desc')->get();
+        })
+        ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+            $query->whereBetween('created_at', [
+                $startDate . ' 00:00:00',
+                $endDate . ' 23:59:59',
+            ]);
+        })
+        ->orderBy('id', 'desc')->get();
     }
 
     private function getSubquery($table, $condition = '1=1')
