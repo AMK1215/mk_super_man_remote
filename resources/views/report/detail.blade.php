@@ -15,7 +15,7 @@
                             <div class="input-group input-group-static mb-4">
                                 <label for="">Product Type</label>
                                 <select name="product_type_id" id="" class="form-control">
-                                    <option value="" disabled>Select Product type</option>
+                                    <option value="" >Select Product type</option>
                                     @foreach($productTypes as $type)
                                     <option value="{{$type->provider_name}}">{{$type->provider_name}}</option>
                                     @endforeach
