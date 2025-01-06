@@ -89,22 +89,27 @@ class ReportController extends Controller
         }
     }
 
-    private function getPlayerDetails($playerId, $productType)
+    private function getPlayerDetails($playerId, $request)
     {
-        $startDate = $request->start_date ?? Carbon::today()->format('Y-m-d');
-        $endDate = $request->end_date ?? Carbon::today()->format('Y-m-d');
+        $startDate = $request->start_date
+        ? Carbon::parse($request->start_date)->toDateTimeString()
+        : Carbon::today()->toDateTimeString();
 
+        $endDate = $request->end_date
+        ? Carbon::parse($request->end_date)->toDateTimeString()
+        : Carbon::today()->toDateTimeString();
+        
         return Result::where('user_id', $playerId)
-        ->when($productType, function ($query) use ($productType) {
-            $query->where('game_provide_name', $productType);
-        })
-        ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('created_at', [
-                $startDate . ' 00:00:00',
-                $endDate . ' 23:59:59',
-            ]);
-        })
-        ->orderBy('id', 'desc')->get();
+            ->when($request->product_type_id, function ($query) use ($request) {
+                $query->where('game_provide_name', $request->product_type_id);
+            })
+            ->when($startDate && $endDate, function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [
+                    $startDate,
+                    $endDate,
+                ]);
+            })
+            ->orderBy('id', 'desc')->get();
     }
 
     private function getSubquery($table, $condition = '1=1')

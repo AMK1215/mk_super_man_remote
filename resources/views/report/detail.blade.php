@@ -25,13 +25,13 @@
                         <div class="col-md-3">
                             <div class="input-group input-group-static mb-4">
                                 <label for="">Start Date</label>
-                                <input type="date" class="form-control" name="start_date" value="{{request()->get('start_date')}}">
+                                <input type="datetime-local" class="form-control" name="start_date" value="{{request()->get('start_date')}}">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="input-group input-group-static mb-4">
                                 <label for="">EndDate</label>
-                                <input type="date" class="form-control" name="end_date" value="{{request()->get('end_date')}}">
+                                <input type="datetime-local" class="form-control" name="end_date" value="{{request()->get('end_date')}}">
                             </div>
                         </div>
                         <div class="col-md-3">
